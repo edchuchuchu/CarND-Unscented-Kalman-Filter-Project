@@ -132,17 +132,16 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	double delta_t_ = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;	//dt - expressed in seconds
 	previous_timestamp_ = meas_package.timestamp_;  
   Prediction(delta_t_);
-   // print the output
-  cout << "Xsig_pred_ = " << Xsig_pred_ << endl;   
-  cout << "x_ = " << x_ << endl;
-  cout << "P_ = " << P_ << endl;  
-  // if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
-    // // Radar updates
-    // UpdateRadar(meas_package);
-  // } else {
-    // // Laser updates
-    // UpdateLidar(meas_package);
-  // } 
+  // print the output
+  // cout << "x_ = " << x_ << endl;
+  // cout << "P_ = " << P_ << endl;  
+  if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+    // Radar updates
+    UpdateRadar(meas_package);
+  } else {
+    // Laser updates
+    UpdateLidar(meas_package);
+  } 
 }
 
 /**
@@ -155,21 +154,6 @@ void UKF::Prediction(double delta_t) {
   Complete this function! Estimate the object's location. Modify the state
   vector, x_. Predict sigma points, the state, and the state covariance matrix.
   */
-  // //set example state
-  // x_ <<   5.7441,
-         // 1.3800,
-         // 2.2049,
-         // 0.5015,
-         // 0.3528;
-
-  // //create example covariance matrix
-  // P_ <<     0.0043,   -0.0013,    0.0030,   -0.0022,   -0.0020,
-          // -0.0013,    0.0077,    0.0011,    0.0071,    0.0060,
-           // 0.0030,    0.0011,    0.0054,    0.0007,    0.0008,
-          // -0.0022,    0.0071,    0.0007,    0.0098,    0.0100,
-          // -0.0020,    0.0060,    0.0008,    0.0100,    0.0123; 
-          
-  // delta_t = 0.1;//time diff in sec
   //Step1. Generate Sigma Points 
   //create augmented mean vector
   VectorXd x_aug = VectorXd(n_aug_);
@@ -283,7 +267,7 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
     double px = Xsig_pred_(0, i);
     double py = Xsig_pred_(1, i);
 
-    Zsig.col(i) << px, py, 0;  
+    Zsig.col(i) << px, py;  
 
     z_pred += weights_(i) * Zsig.col(i);
   }
