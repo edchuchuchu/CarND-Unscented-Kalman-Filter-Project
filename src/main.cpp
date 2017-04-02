@@ -135,7 +135,13 @@ int main(int argc, char* argv[]) {
   // used to compute the RMSE later
   vector<VectorXd> estimations;
   vector<VectorXd> ground_truth;
-
+  
+  // used to compute the NIS later
+  double radar_cnt = 0.0;
+  double laser_cnt = 0.0;
+  double radar_vaild = 0.0;
+  double laser_vaild = 0.0;
+  
   // start filtering from the second frame (the speed is unknown in the first
   // frame)
 
@@ -193,9 +199,17 @@ int main(int argc, char* argv[]) {
     // output the NIS values
     
     if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::LASER) {
+      laser_cnt += 1.0;
       out_file_ << ukf.NIS_laser_ << "\n";
+      if (ukf.NIS_laser_ > 0.352 && ukf.NIS_laser_ < 7.815){
+        laser_vaild += 1.0;
+      }
     } else if (measurement_pack_list[k].sensor_type_ == MeasurementPackage::RADAR) {
+      radar_cnt += 1.0;
       out_file_ << ukf.NIS_radar_ << "\n";
+      if (ukf.NIS_radar_ > 0.352 && ukf.NIS_radar_ < 7.815){
+        radar_vaild += 1.0;
+      }
     }
 
 
@@ -217,7 +231,13 @@ int main(int argc, char* argv[]) {
   // compute the accuracy (RMSE)
   Tools tools;
   cout << "Accuracy - RMSE:" << endl << tools.CalculateRMSE(estimations, ground_truth) << endl;
-
+  
+  // compute the accuracy (NIS)
+  double radar_acc = radar_vaild / radar_cnt;
+  double laser_acc = laser_vaild / laser_cnt;
+  cout << "NIS Accuracy - Radar :" << radar_acc << "%" << endl;
+  cout << "NIS Accuracy - Laser :" << laser_acc << "%" << endl;
+  
   // close files
   if (out_file_.is_open()) {
     out_file_.close();
